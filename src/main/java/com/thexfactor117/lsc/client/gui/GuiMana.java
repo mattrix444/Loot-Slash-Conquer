@@ -19,71 +19,48 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class GuiMana extends Gui
-{
-	private Minecraft mc = Minecraft.getMinecraft();
-	private static ResourceLocation location = new ResourceLocation(Reference.MODID, "textures/gui/mana.png");
-	
-	public GuiMana()
-	{
-		super();
-	}
-	
-	@SubscribeEvent
-	public void onRenderOverlay(RenderGameOverlayEvent.Post event)
-	{
-		if (Configs.renderingCategory.renderCustomManabar)
-		{
-			if (event.getType() != ElementType.EXPERIENCE) return;
-			else
-			{
-				ScaledResolution sr = event.getResolution();
-				EntityPlayer player = mc.player;
-				
-				if (!player.capabilities.isCreativeMode)
-				{
-					LSCPlayerCapability cap = PlayerUtil.getLSCPlayer(player);
-					
-					if (cap != null)
-					{
-						if (cap.getMaxMana() != 0)
-						{
-							double manaBarWidth = (double) cap.getMana() / cap.getMaxMana() * 81.0;
-							int xPos = sr.getScaledWidth() / 2 + 10;
-							int yPos = sr.getScaledHeight() - 38;
-							
-							mc.renderEngine.bindTexture(location);
+public class GuiMana extends Gui {
+    private static final ResourceLocation MANA_BAR_TEXTURE = new ResourceLocation(Reference.MODID, "textures/gui/mana.png");
 
-							//if (capMana.getMana() != capMana.getMaxMana())
-							//{
-								this.drawTexturedModalRect(xPos, yPos, 0, 18, 81, 6);
-								this.drawTexturedModalRect(xPos, yPos, 0, 24, (int) manaBarWidth, 5);
-							//}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	@SubscribeEvent
-	public void onRenderOverlayText(RenderGameOverlayEvent.Text event)
-	{
-		if (Configs.renderingCategory.renderCustomManabar)
-		{
-			ScaledResolution sr = event.getResolution();
-			EntityPlayer player = Minecraft.getMinecraft().player;
-			LSCPlayerCapability cap = PlayerUtil.getLSCPlayer(player);
-			
-			if (!player.capabilities.isCreativeMode && cap != null)
-			{
-				String mana = cap.getMana() + " / " + cap.getMaxMana();
-				
-				GL11.glPushMatrix();
-				GL11.glScalef(0.5F, 0.5F, 0.5F);
-				Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(mana, (sr.getScaledWidth() / 2 + 37) * 2, (sr.getScaledHeight() - 37) * 2, 0xFFFFFF);
-				GL11.glPopMatrix();
-			}
-		}
-	}
+    @SubscribeEvent
+    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
+        if (!Configs.renderingCategory.renderCustomManabar || event.getType() != ElementType.EXPERIENCE) return;
+
+        Minecraft mc = Minecraft.getMinecraft();
+        EntityPlayer player = mc.player;
+        
+        if (!player.capabilities.isCreativeMode) {
+            LSCPlayerCapability cap = PlayerUtil.getLSCPlayer(player);
+            
+            if (cap != null && cap.getMaxMana() != 0) {
+                ScaledResolution sr = event.getResolution();
+                double manaBarWidth = (double) cap.getMana() / cap.getMaxMana() * 81.0;
+                int xPos = sr.getScaledWidth() / 2 + 10;
+                int yPos = sr.getScaledHeight() - 38;
+                
+                mc.getTextureManager().bindTexture(MANA_BAR_TEXTURE);
+                this.drawTexturedModalRect(xPos, yPos, 0, 18, 81, 6);
+                this.drawTexturedModalRect(xPos, yPos, 0, 24, (int) manaBarWidth, 5);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onRenderOverlayText(RenderGameOverlayEvent.Text event) {
+        if (!Configs.renderingCategory.renderCustomManabar) return;
+
+        Minecraft mc = Minecraft.getMinecraft();
+        EntityPlayer player = mc.player;
+        LSCPlayerCapability cap = PlayerUtil.getLSCPlayer(player);
+        
+        if (!player.capabilities.isCreativeMode && cap != null) {
+            String mana = cap.getMana() + " / " + cap.getMaxMana();
+            ScaledResolution sr = event.getResolution();
+            
+            GL11.glPushMatrix();
+            GL11.glScalef(0.5F, 0.5F, 0.5F);
+            mc.fontRenderer.drawStringWithShadow(mana, (sr.getScaledWidth() / 2 + 37) * 2, (sr.getScaledHeight() - 37) * 2, 0xFFFFFF);
+            GL11.glPopMatrix();
+        }
+    }
 }
